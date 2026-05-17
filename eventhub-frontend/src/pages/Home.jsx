@@ -135,7 +135,7 @@ const Home = () => {
           </div>
         )}
       </main>
-    </div>
+    </motion.div>
   );
 };
 

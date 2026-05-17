@@ -61,7 +61,7 @@ const CardEvent = ({ event }) => {
           <ArrowRight className="w-4 h-4 ml-2" />
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

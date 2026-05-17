@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getEventById } from '../services/eventService';
 import { Calendar, MapPin, ArrowLeft, Loader2, Tag, Users, CheckCircle } from 'lucide-react';
 
@@ -59,7 +60,13 @@ const EventDetail = () => {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-slate-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8"
+    >
       <div className="max-w-4xl mx-auto">
         <Link to="/" className="inline-flex items-center text-slate-500 hover:text-blue-600 font-medium mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -147,7 +154,7 @@ const EventDetail = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
