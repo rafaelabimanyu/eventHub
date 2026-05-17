@@ -75,7 +75,7 @@ const Home = () => {
           </div>
           
           {/* Category Filters */}
-          <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 hide-scrollbar snap-x">
+          <div className="flex flex-wrap gap-2 w-full lg:w-auto items-center">
             <div className="hidden lg:flex items-center justify-center bg-gray-100 w-10 h-10 rounded-full mr-2">
               <Filter className="w-5 h-5 text-gray-500" />
             </div>
@@ -83,10 +83,10 @@ const Home = () => {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`snap-center whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   selectedCategory === category 
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 transform scale-105' 
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 hover:border-gray-300'
+                  ? 'bg-blue-600 text-white shadow-md' 
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                 }`}
               >
                 {category}
@@ -121,7 +121,7 @@ const Home = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => (
               <CardEvent key={event.id} event={event} />
             ))}

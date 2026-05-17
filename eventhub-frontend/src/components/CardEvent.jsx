@@ -13,53 +13,48 @@ const CardEvent = ({ event }) => {
   });
 
   return (
-    <div className="group flex flex-col bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden relative h-full">
-      {/* Decorative gradient top bar */}
-      <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+    <div className="bg-white shadow rounded-xl p-5 border border-gray-200 flex flex-col hover:shadow-lg transition-shadow duration-300 h-full">
       
-      <div className="p-6 flex flex-col flex-grow">
-        
-        {/* Badges */}
-        <div className="flex justify-between items-start mb-4">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
-            <Tag className="w-3 h-3 mr-1.5" />
-            {category || 'Umum'}
-          </span>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-            <Users className="w-3 h-3 mr-1.5" />
-            Sisa: {quota}
-          </span>
+      {/* Badges */}
+      <div className="flex justify-between items-start mb-4">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-700">
+          <Tag className="w-3 h-3 mr-1" />
+          {category || 'Umum'}
+        </span>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-green-100 text-green-700">
+          <Users className="w-3 h-3 mr-1" />
+          Sisa: {quota}
+        </span>
+      </div>
+      
+      {/* Title */}
+      <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+        {title}
+      </h3>
+      
+      {/* Date & Location */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center text-gray-600 text-sm">
+          <Calendar className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+          <span className="truncate">{formattedDate}</span>
         </div>
-        
-        {/* Title */}
-        <h3 className="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors leading-tight">
-          {title}
-        </h3>
-        
-        {/* Date & Location */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-gray-600 text-sm font-medium">
-            <Calendar className="w-4 h-4 mr-2.5 text-blue-500 flex-shrink-0" />
-            <span className="truncate">{formattedDate}</span>
-          </div>
-          <div className="flex items-center text-gray-600 text-sm font-medium">
-            <MapPin className="w-4 h-4 mr-2.5 text-blue-500 flex-shrink-0" />
-            <span className="truncate">{location}</span>
-          </div>
+        <div className="flex items-center text-gray-600 text-sm">
+          <MapPin className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+          <span className="truncate">{location}</span>
         </div>
-        
-        {/* Description */}
-        <p className="text-gray-500 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed">
-          {description}
-        </p>
-        
-        {/* Action Button */}
-        <div className="mt-auto pt-4 border-t border-gray-100">
-          <Link to={`/event/${id}`} className="w-full flex items-center justify-center py-2.5 px-4 rounded-xl bg-gray-50 hover:bg-blue-600 text-gray-700 hover:text-white font-bold text-sm transition-all duration-300 group-hover:shadow-md">
-            Lihat Detail Event
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
+      </div>
+      
+      {/* Description */}
+      <p className="text-gray-500 text-sm line-clamp-3 mb-6 flex-grow">
+        {description}
+      </p>
+      
+      {/* Action Button */}
+      <div className="mt-auto pt-4 border-t border-gray-100">
+        <Link to={`/event/${id}`} className="w-full flex items-center justify-center py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors duration-200">
+          Lihat Detail Event
+          <ArrowRight className="w-4 h-4 ml-2" />
+        </Link>
       </div>
     </div>
   );
