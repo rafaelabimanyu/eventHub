@@ -1,21 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState, useContext } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getEventById } from '../services/eventService';
-import { Calendar, MapPin, ArrowLeft, Loader2, Tag, Users, CheckCircle } from 'lucide-react';
+import { bookTicket, checkRegistration } from '../services/ticketService';
+import { AuthContext } from '../context/AuthContext';
+import TicketModal from '../components/TicketModal';
+import { Calendar, MapPin, ArrowLeft, Loader2, Tag, Users, CheckCircle, Ticket } from 'lucide-react';
 
 const EventDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Registration States
   const [registered, setRegistered] = useState(false);
+  const [ticketData, setTicketData] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
 
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchEventData = async () => {
       try {
         const data = await getEventById(id);
         setEvent(data);
+        
+        // If logged in, check if already registered
+        if (user) {
+          const check = await checkRegistration(id);
+          if (check.isRegistered) {
+            setRegistered(true);
+            setTicketData(check.ticket);
+          }
+        }
       } catch (err) {
         setError('Gagal memuat detail event. Event mungkin tidak ditemukan.');
       } finally {
@@ -23,8 +49,30 @@ const EventDetail = () => {
       }
     };
 
-    fetchEvent();
-  }, [id]);
+    fetchEventData();
+  }, [id, user]);
+
+  const handleBooking = async () => {
+    if (!user) {
+      showToast('Silakan login terlebih dahulu untuk mendaftar', 'error');
+      setTimeout(() => navigate('/login'), 1500);
+      return;
+    }
+
+    setBookingLoading(true);
+    try {
+      const response = await bookTicket(id);
+      showToast('Pendaftaran Berhasil!');
+      setRegistered(true);
+      setTicketData(response.ticket);
+      setEvent(prev => ({ ...prev, quota: prev.quota - 1 })); // Decrement real-time quota
+      setShowTicketModal(true);
+    } catch (err) {
+      showToast(err?.response?.data?.message || 'Gagal mendaftar event', 'error');
+    } finally {
+      setBookingLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -51,21 +99,13 @@ const EventDetail = () => {
   }
 
   const formattedDate = new Date(event.date).toLocaleDateString('id-ID', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }} 
-      animate={{ opacity: 1, y: 0 }} 
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
-      className="min-h-screen bg-slate-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8"
+      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}
+      className="min-h-screen bg-slate-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8 relative"
     >
       <div className="max-w-4xl mx-auto">
         <Link to="/" className="inline-flex items-center text-slate-500 hover:text-blue-600 font-medium mb-8 transition-colors">
@@ -125,19 +165,31 @@ const EventDetail = () => {
               
               <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col justify-center">
                 <h3 className="font-semibold text-slate-900 mb-2">Pendaftaran Event</h3>
-                <p className="text-slate-500 text-sm mb-5">Segera daftar sebelum kehabisan kuota! Hanya tersisa {event.quota} kursi.</p>
+                <p className="text-slate-500 text-sm mb-5">
+                  {registered ? 'Tiket Anda sudah diterbitkan dan aman.' : `Segera daftar sebelum kehabisan kuota! Hanya tersisa ${event.quota} kursi.`}
+                </p>
+                
                 {registered ? (
-                  <div className="flex items-center justify-center py-3 px-4 rounded-xl bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200">
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Berhasil Mendaftar
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex items-center justify-center py-3 px-4 rounded-xl bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200">
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                      Anda Sudah Terdaftar
+                    </div>
+                    <button 
+                      onClick={() => setShowTicketModal(true)}
+                      className="w-full flex items-center justify-center py-3 px-4 rounded-xl bg-white text-indigo-600 font-bold hover:bg-indigo-50 border border-indigo-100 transition-colors shadow-sm"
+                    >
+                      <Ticket className="w-5 h-5 mr-2" />
+                      Lihat E-Ticket Saya
+                    </button>
                   </div>
                 ) : (
                   <button 
-                    onClick={() => setRegistered(true)}
-                    disabled={event.quota <= 0}
+                    onClick={handleBooking}
+                    disabled={event.quota <= 0 || bookingLoading}
                     className="w-full flex items-center justify-center py-3 px-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                   >
-                    {event.quota > 0 ? 'Daftar Event Sekarang' : 'Kuota Penuh'}
+                    {bookingLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (event.quota > 0 ? 'Daftar Event Sekarang' : 'Kuota Penuh')}
                   </button>
                 )}
               </div>
@@ -154,6 +206,28 @@ const EventDetail = () => {
           </div>
         </div>
       </div>
+
+      <TicketModal 
+        isOpen={showTicketModal} 
+        onClose={() => setShowTicketModal(false)} 
+        ticket={ticketData} 
+        event={event} 
+        user={user} 
+      />
+
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={`fixed bottom-8 right-8 flex items-center px-6 py-4 rounded-xl shadow-2xl z-50 text-white font-medium ${
+              toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'
+            }`}
+          >
+            {toast.type === 'success' ? <CheckCircle className="w-5 h-5 mr-3" /> : <div className="w-5 h-5 mr-3 font-bold">!</div>}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
