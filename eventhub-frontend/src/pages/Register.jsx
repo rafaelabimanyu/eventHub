@@ -136,7 +136,7 @@ const Register = () => {
           </div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
