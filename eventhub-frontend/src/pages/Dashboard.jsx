@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getOrganizerEvents, createEvent, updateEvent, deleteEvent } from '../services/eventService';
 import { AuthContext } from '../context/AuthContext';
 import EventModal from '../components/EventModal';
-import { CalendarDays, Users, Ticket, Plus, Edit2, Trash2, Calendar, MapPin, LayoutDashboard, Settings } from 'lucide-react';
+import { CalendarDays, Users, Ticket, Plus, Edit2, Trash2, Calendar, MapPin, LayoutDashboard, Settings, CheckCircle, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -14,8 +14,13 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  // Redirect if not logged in or not an organizer/admin
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+  };
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -28,6 +33,7 @@ const Dashboard = () => {
       setEvents(data);
     } catch (error) {
       console.error(error);
+      showToast('Gagal memuat data event', 'error');
     } finally {
       setLoading(false);
     }
@@ -41,23 +47,26 @@ const Dashboard = () => {
     try {
       if (editingEvent) {
         await updateEvent(editingEvent.id, formData);
+        showToast('Event berhasil diperbarui!');
       } else {
         await createEvent(formData);
+        showToast('Event baru berhasil dibuat!');
       }
       setIsModalOpen(false);
       fetchMyEvents();
     } catch (error) {
-      alert(error?.response?.data?.message || 'Terjadi kesalahan');
+      showToast(error?.response?.data?.message || 'Terjadi kesalahan saat menyimpan event', 'error');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Yakin ingin menghapus event ini?')) {
+    if (window.confirm('Yakin ingin menghapus event ini secara permanen?')) {
       try {
         await deleteEvent(id);
-        fetchMyEvents();
+        showToast('Event berhasil dihapus!');
+        setEvents(prev => prev.filter(e => e.id !== id));
       } catch (error) {
-        alert('Gagal menghapus event');
+        showToast('Gagal menghapus event', 'error');
       }
     }
   };
@@ -72,13 +81,9 @@ const Dashboard = () => {
     setIsModalOpen(true);
   };
 
-  // Animation Variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
   const itemVariants = {
@@ -94,9 +99,8 @@ const Dashboard = () => {
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="flex min-h-[calc(100vh-64px)] bg-gray-50 overflow-hidden"
+      className="flex min-h-[calc(100vh-64px)] bg-gray-50 overflow-hidden relative"
     >
-      {/* Sidebar - Animated Width */}
       <motion.aside
         animate={{ width: sidebarOpen ? 260 : 80 }}
         className="bg-white border-r border-gray-200 hidden md:flex flex-col z-10 whitespace-nowrap"
@@ -122,7 +126,6 @@ const Dashboard = () => {
         </nav>
       </motion.aside>
 
-      {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-8 w-full">
         <div className="max-w-6xl mx-auto">
           
@@ -142,13 +145,7 @@ const Dashboard = () => {
             </motion.button>
           </div>
 
-          {/* Stats Cards with Stagger Animation */}
-          <motion.div 
-            variants={containerVariants} 
-            initial="hidden" 
-            animate="show" 
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"
-          >
+          <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <motion.div variants={itemVariants} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center relative overflow-hidden">
               <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-50 rounded-full opacity-50 pointer-events-none"></div>
               <div className="p-4 bg-blue-100 text-blue-600 rounded-xl mr-5">
@@ -183,7 +180,6 @@ const Dashboard = () => {
             </motion.div>
           </motion.div>
 
-          {/* Event List */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-6 py-5 border-b border-gray-50 bg-gray-50/50">
               <h2 className="text-lg font-bold text-gray-900">Daftar Event Anda</h2>
@@ -212,57 +208,60 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {events.map((event) => (
-                      <motion.tr 
-                        key={event.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        whileHover={{ backgroundColor: 'rgba(249, 250, 251, 0.5)' }}
-                        className="transition-colors"
-                      >
-                        <td className="px-6 py-4">
-                          <p className="font-bold text-gray-900">{event.title}</p>
-                          <p className="text-sm text-gray-500">Kuota: {event.quota}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center text-sm text-gray-600 mb-1">
-                            <Calendar className="w-4 h-4 mr-2 text-gray-400" />
-                            {new Date(event.date).toLocaleDateString('id-ID')}
-                          </div>
-                          <div className="flex items-center text-sm text-gray-600">
-                            <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                            {event.location}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
-                            {event.category}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end space-x-2">
-                            <motion.button 
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => openEditModal(event)}
-                              className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                              title="Edit"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </motion.button>
-                            <motion.button 
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleDelete(event.id)}
-                              className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                              title="Hapus"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </motion.button>
-                          </div>
-                        </td>
-                      </motion.tr>
-                    ))}
+                    <AnimatePresence>
+                      {events.map((event) => (
+                        <motion.tr 
+                          key={event.id}
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, x: -20, backgroundColor: '#fee2e2' }}
+                          whileHover={{ backgroundColor: 'rgba(249, 250, 251, 0.5)' }}
+                          className="transition-colors"
+                        >
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-gray-900">{event.title}</p>
+                            <p className="text-sm text-gray-500">Kuota: {event.quota}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center text-sm text-gray-600 mb-1">
+                              <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                              {new Date(event.date).toLocaleDateString('id-ID')}
+                            </div>
+                            <div className="flex items-center text-sm text-gray-600">
+                              <MapPin className="w-4 h-4 mr-2 text-gray-400" />
+                              {event.location}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
+                              {event.category}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end space-x-2">
+                              <motion.button 
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => openEditModal(event)}
+                                className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </motion.button>
+                              <motion.button 
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => handleDelete(event.id)}
+                                className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                                title="Hapus"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </motion.button>
+                            </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
                   </tbody>
                 </table>
               </div>
@@ -271,13 +270,33 @@ const Dashboard = () => {
         </div>
       </main>
 
-      {/* Modal */}
       <EventModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSubmit={handleCreateOrUpdate}
         initialData={editingEvent}
       />
+
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={`fixed bottom-8 right-8 flex items-center px-6 py-4 rounded-xl shadow-2xl z-50 text-white font-medium ${
+              toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'
+            }`}
+          >
+            {toast.type === 'success' ? (
+              <CheckCircle className="w-5 h-5 mr-3" />
+            ) : (
+              <AlertCircle className="w-5 h-5 mr-3" />
+            )}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </motion.div>
   );
 };

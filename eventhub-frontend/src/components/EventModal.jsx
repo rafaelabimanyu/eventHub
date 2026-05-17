@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, AlertCircle } from 'lucide-react';
 
 const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({
@@ -12,10 +12,11 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     description: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    setError('');
     if (initialData) {
-      // Format date for input type="date" (YYYY-MM-DD)
       const formattedDate = initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : '';
       setFormData({
         ...initialData,
@@ -29,29 +30,34 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setError(''); // Clear error on change
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validasi
+    if (parseInt(formData.quota) <= 0) {
+      setError('Kuota peserta harus lebih dari 0.');
+      return;
+    }
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (selectedDate < today) {
+      setError('Tanggal event tidak boleh di masa lalu.');
+      return;
+    }
+
     setLoading(true);
     await onSubmit(formData);
     setLoading(false);
   };
 
-  // Animation variants
-  const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 }
-  };
-
+  const backdropVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      y: 0,
-      transition: { type: 'spring', damping: 25, stiffness: 300 }
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } },
     exit: { opacity: 0, scale: 0.95, y: 20 }
   };
 
@@ -74,7 +80,6 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h2 className="text-xl font-bold text-gray-900">
                 {initialData ? 'Edit Event' : 'Buat Event Baru'}
@@ -87,8 +92,22 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               </button>
             </div>
 
-            {/* Body */}
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              
+              <AnimatePresence>
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} 
+                    animate={{ opacity: 1, height: 'auto' }} 
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-100 font-medium flex items-center overflow-hidden"
+                  >
+                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+                    <p className="text-sm">{error}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="col-span-2 md:col-span-1">
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Nama Event</label>
@@ -178,7 +197,6 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="pt-4 mt-6 border-t border-gray-100 flex justify-end gap-3">
                 <button
                   type="button"
