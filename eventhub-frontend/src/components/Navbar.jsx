@@ -35,6 +35,14 @@ const Navbar = () => {
                     </span>
                   )}
                 </div>
+                
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                >
+                  Dashboard
+                </Link>
+
                 <button
                   onClick={handleLogout}
                   className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"

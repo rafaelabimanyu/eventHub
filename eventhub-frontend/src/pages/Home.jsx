@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { getEvents } from '../services/eventService';
 import CardEvent from '../components/CardEvent';
 import { LayoutGrid, Loader2, Search, Filter } from 'lucide-react';
@@ -36,7 +37,13 @@ const Home = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-gray-50 flex flex-col"
+    >
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-indigo-900 via-blue-900 to-indigo-800 pt-24 pb-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>

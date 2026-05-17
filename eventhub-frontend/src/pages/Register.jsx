@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../services/authService';
 import { AuthContext } from '../context/AuthContext';
@@ -32,7 +33,13 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.98 }} 
+      animate={{ opacity: 1, scale: 1 }} 
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+    >
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
         <div>
           <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900">

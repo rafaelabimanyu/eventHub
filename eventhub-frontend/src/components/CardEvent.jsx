@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Calendar, MapPin, ArrowRight, Tag, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -13,7 +14,11 @@ const CardEvent = ({ event }) => {
   });
 
   return (
-    <div className="bg-white shadow rounded-xl p-5 border border-gray-200 flex flex-col hover:shadow-lg transition-shadow duration-300 h-full">
+    <motion.div 
+      whileHover={{ y: -5, scale: 1.01 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="bg-white shadow rounded-xl p-5 border border-gray-200 flex flex-col hover:shadow-xl transition-shadow duration-300 h-full"
+    >
       
       {/* Badges */}
       <div className="flex justify-between items-start mb-4">
