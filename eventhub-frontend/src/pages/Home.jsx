@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getEvents } from '../services/eventService';
 import CardEvent from '../components/CardEvent';
-import { LayoutGrid, Loader2, Search, Filter } from 'lucide-react';
+import { LayoutGrid, Loader2, Search, Filter, AlertCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const CATEGORIES = ['Semua', 'Teknologi', 'Musik', 'Bisnis'];
 
@@ -12,6 +13,18 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [toast, setToast] = useState({ show: false, message: '' });
+  
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.error) {
+      setToast({ show: true, message: location.state.error });
+      setTimeout(() => setToast({ show: false, message: '' }), 3000);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -135,6 +148,20 @@ const Home = () => {
           </div>
         )}
       </main>
+
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 right-8 flex items-center px-6 py-4 rounded-xl shadow-2xl z-50 text-white font-medium bg-red-600"
+          >
+            <AlertCircle className="w-5 h-5 mr-3" />
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

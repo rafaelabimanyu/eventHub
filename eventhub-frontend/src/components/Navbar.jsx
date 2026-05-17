@@ -35,28 +35,31 @@ const Navbar = () => {
                     </span>
                   )}
                 </div>
-                <Link
-                  to="/my-tickets"
-                  className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors ml-4"
-                >
-                  Tiket Saya
-                </Link>
-
-                {user.role === 'admin' && (
+                {user.role === 'visitor' && (
                   <Link
-                    to="/admin/validator"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors ml-4 mr-2"
+                    to="/my-tickets"
+                    className="inline-flex items-center px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ml-4"
                   >
-                    Validator
+                    Tiket Saya
                   </Link>
                 )}
-                
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ml-2"
-                >
-                  Dashboard
-                </Link>
+
+                {user.role === 'admin' && (
+                  <>
+                    <Link
+                      to="/admin/validator"
+                      className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors ml-4 mr-2"
+                    >
+                      Validator
+                    </Link>
+                    <Link
+                      to="/dashboard"
+                      className="inline-flex items-center px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ml-2"
+                    >
+                      Ke Dashboard
+                    </Link>
+                  </>
+                )}
 
                 <button
                   onClick={handleLogout}

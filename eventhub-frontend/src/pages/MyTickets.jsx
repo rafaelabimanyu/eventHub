@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { getMyTickets } from '../services/ticketService';
 import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import { Loader2, Calendar, MapPin, Tag, CheckCircle, Clock, XCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Calendar, MapPin, Tag, CheckCircle, Clock, XCircle, ArrowRight, Ticket } from 'lucide-react';
 
 const MyTickets = () => {
   const { user } = useContext(AuthContext);
@@ -16,7 +16,7 @@ const MyTickets = () => {
         const data = await getMyTickets();
         setTickets(data);
       } catch (error) {
-        console.error('Error fetching tickets:', error);
+        // Silent error
       } finally {
         setLoading(false);
       }
@@ -65,16 +65,26 @@ const MyTickets = () => {
         </div>
 
         {tickets.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-slate-100 shadow-sm">
-            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
-              <Tag className="w-10 h-10" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Belum Ada Tiket</h3>
-            <p className="text-slate-500 mb-6">Anda belum mendaftar ke event manapun.</p>
-            <Link to="/" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-              Cari Event Sekarang
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            className="bg-white rounded-3xl p-16 text-center border border-slate-100 shadow-sm max-w-2xl mx-auto"
+          >
+            <motion.div 
+              initial={{ rotate: -10, y: 0 }} 
+              animate={{ rotate: 10, y: -10 }} 
+              transition={{ repeat: Infinity, repeatType: 'mirror', duration: 2, ease: 'easeInOut' }}
+              className="w-24 h-24 bg-gradient-to-tr from-blue-100 to-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 shadow-inner"
+            >
+              <Ticket className="w-12 h-12" />
+            </motion.div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">Belum Ada Tiket</h3>
+            <p className="text-slate-500 mb-8 text-lg">Kamu belum memiliki tiket. Yuk, jelajahi event menarik dan daftarkan dirimu sekarang!</p>
+            <Link to="/" className="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-bold rounded-2xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-1">
+              Jelajahi Event
             </Link>
-          </div>
+          </motion.div>
         ) : (
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {tickets.map((ticket) => (

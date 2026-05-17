@@ -32,7 +32,6 @@ const Dashboard = () => {
       const data = await getOrganizerEvents();
       setEvents(data);
     } catch (error) {
-      console.error(error);
       showToast('Gagal memuat data event', 'error');
     } finally {
       setLoading(false);
@@ -188,14 +187,31 @@ const Dashboard = () => {
             {loading ? (
               <div className="p-12 text-center text-gray-500">Memuat data...</div>
             ) : events.length === 0 ? (
-              <div className="p-16 text-center">
-                <div className="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CalendarDays className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum ada event</h3>
-                <p className="text-gray-500 mb-6">Anda belum membuat event apa pun. Mulai buat event pertama Anda!</p>
-                <button onClick={openCreateModal} className="text-blue-600 font-bold hover:underline">Buat Event Sekarang</button>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-16 text-center max-w-lg mx-auto"
+              >
+                <motion.div 
+                  initial={{ y: 0 }} 
+                  animate={{ y: -10 }} 
+                  transition={{ repeat: Infinity, repeatType: 'mirror', duration: 1.5, ease: 'easeInOut' }}
+                  className="w-24 h-24 bg-gradient-to-tr from-blue-100 to-indigo-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"
+                >
+                  <CalendarDays className="w-12 h-12" />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">Belum Ada Event</h3>
+                <p className="text-gray-500 mb-8 text-lg">Anda belum membuat event apa pun. Mulai ciptakan event luar biasa pertama Anda sekarang juga!</p>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={openCreateModal} 
+                  className="inline-flex items-center px-8 py-3.5 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Buat Event Pertama Anda
+                </motion.button>
+              </motion.div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">

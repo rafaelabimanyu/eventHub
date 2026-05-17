@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import MyTickets from './pages/MyTickets';
 import AdminValidator from './pages/AdminValidator';
 import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // AnimatePresence requires useLocation to know when the route changes
 const AnimatedRoutes = () => {
@@ -21,9 +22,17 @@ const AnimatedRoutes = () => {
         <Route path="/event/:id" element={<EventDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/my-tickets" element={<MyTickets />} />
-        <Route path="/admin/validator" element={<AdminValidator />} />
+        
+        {/* Protected Routes for Visitor */}
+        <Route element={<ProtectedRoute allowedRoles={['visitor', 'admin']} />}>
+          <Route path="/my-tickets" element={<MyTickets />} />
+        </Route>
+
+        {/* Protected Routes for Admin */}
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin/validator" element={<AdminValidator />} />
+        </Route>
       </Routes>
     </AnimatePresence>
   );

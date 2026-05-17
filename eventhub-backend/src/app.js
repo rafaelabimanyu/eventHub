@@ -27,6 +27,15 @@ app.get('/', (req, res) => {
   res.send('EventHub API is running...');
 });
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  // If it's a Multer error or any other unhandled error
+  res.status(500).json({ 
+    message: err.message || 'Internal Server Error',
+    success: false 
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
