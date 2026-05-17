@@ -36,80 +36,88 @@ const Home = () => {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-12 text-center">
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mb-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-indigo-900 via-blue-900 to-indigo-800 pt-24 pb-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div className="max-w-7xl mx-auto relative z-10 text-center">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/20 text-blue-200 text-sm font-semibold mb-6 border border-blue-400/30 backdrop-blur-sm">
             <LayoutGrid className="w-4 h-4 mr-2" />
-            Temukan Event Lokal Terbaik
+            Platform Event No.1 di Indonesia
           </div>
-          <h1 className="text-4xl font-extrabold text-slate-900 sm:text-5xl tracking-tight mb-4">
-            Cari <span className="text-blue-600">Pengalaman</span> Barumu
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-6">
+            Temukan <span className="text-blue-400">Pengalaman</span> Tak Terlupakan
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            EventHub menghubungkan Anda dengan workshop, meetup, dan konferensi terbaik di sekitar Anda.
+          <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto font-light">
+            EventHub menghubungkan Anda dengan workshop, konferensi, dan meetup paling inspiratif di kota Anda. Jangan sampai terlewatkan!
           </p>
-        </header>
+        </div>
+      </section>
 
-        {/* Search & Filter Section */}
-        <div className="mb-10 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-            {/* Search Bar */}
-            <div className="relative w-full md:w-1/2">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-slate-400" />
-              </div>
-              <input
-                type="text"
-                className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
-                placeholder="Cari nama event atau lokasi..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+      {/* Main Content */}
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full -mt-16 relative z-20 pb-20">
+        
+        {/* Search & Filter Bar */}
+        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 mb-12 flex flex-col lg:flex-row gap-4 justify-between items-center border border-gray-100">
+          
+          {/* Search Input */}
+          <div className="relative w-full lg:w-1/2">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
-            
-            {/* Category Filters */}
-            <div className="flex items-center space-x-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-              <Filter className="w-5 h-5 text-slate-400 mr-2 hidden md:block" />
-              {CATEGORIES.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    selectedCategory === category 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+            <input
+              type="text"
+              className="block w-full pl-12 pr-4 py-3.5 border-2 border-gray-100 rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-blue-500 focus:bg-white transition-colors sm:text-sm font-medium"
+              placeholder="Cari nama event, topik, atau lokasi..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          {/* Category Filters */}
+          <div className="flex items-center gap-2 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 hide-scrollbar snap-x">
+            <div className="hidden lg:flex items-center justify-center bg-gray-100 w-10 h-10 rounded-full mr-2">
+              <Filter className="w-5 h-5 text-gray-500" />
             </div>
+            {CATEGORIES.map(category => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`snap-center whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+                  selectedCategory === category 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 transform scale-105' 
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Content Area */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
-            <p className="text-slate-500 font-medium">Memuat event keren untukmu...</p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+            <p className="text-gray-500 font-medium text-lg">Memuat event keren untukmu...</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center max-w-xl mx-auto">
-            <p className="text-red-600 font-semibold mb-2">Oops!</p>
+          <div className="bg-red-50 border-2 border-red-100 rounded-2xl p-10 text-center max-w-2xl mx-auto shadow-sm">
+            <p className="text-red-600 font-bold text-xl mb-2">Oops! Terjadi Kesalahan</p>
             <p className="text-red-500">{error}</p>
           </div>
         ) : filteredEvents.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-2xl p-12 text-center max-w-2xl mx-auto shadow-sm">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
-              <Search className="w-8 h-8 text-slate-400" />
+          <div className="bg-white border border-gray-200 rounded-3xl p-16 text-center max-w-3xl mx-auto shadow-sm">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 mb-6 border-8 border-white shadow-sm">
+              <Search className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Tidak ada event ditemukan</h3>
-            <p className="text-slate-500">Coba gunakan kata kunci pencarian yang berbeda atau ubah kategori filter Anda.</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">Tidak ada event yang cocok</h3>
+            <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto">Coba gunakan kata kunci pencarian yang berbeda atau pilih kategori filter yang lain.</p>
             <button 
               onClick={() => { setSearchQuery(''); setSelectedCategory('Semua'); }}
-              className="mt-6 px-6 py-2 bg-blue-50 text-blue-600 font-medium rounded-xl hover:bg-blue-100 transition-colors"
+              className="px-8 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-xl transition-colors"
             >
-              Reset Pencarian
+              Reset Filter Pencarian
             </button>
           </div>
         ) : (
@@ -119,7 +127,7 @@ const Home = () => {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
