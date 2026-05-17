@@ -41,7 +41,13 @@ const getOrganizerEvents = async (req, res) => {
 
 const createEvent = async (req, res) => {
   try {
-    const { title, date, location, description, category, quota } = req.body;
+    const { title, date, location, description, category, quota, price } = req.body;
+    let imageUrl = null;
+    
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
+
     const event = await prisma.event.create({
       data: {
         title,
@@ -50,6 +56,8 @@ const createEvent = async (req, res) => {
         description,
         category,
         quota: parseInt(quota),
+        price: parseInt(price || 0),
+        image: imageUrl,
         userId: req.user.id
       }
     });
@@ -62,7 +70,7 @@ const createEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, date, location, description, category, quota } = req.body;
+    const { title, date, location, description, category, quota, price } = req.body;
     
     const existingEvent = await prisma.event.findUnique({ where: { id } });
     if (!existingEvent) return res.status(404).json({ message: 'Event not found' });
@@ -70,6 +78,11 @@ const updateEvent = async (req, res) => {
     // Check if user is the organizer
     if (existingEvent.userId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized to update this event' });
+    }
+
+    let imageUrl = existingEvent.image;
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
     }
 
     const event = await prisma.event.update({
@@ -80,7 +93,9 @@ const updateEvent = async (req, res) => {
         location,
         description,
         category,
-        quota: parseInt(quota)
+        quota: parseInt(quota),
+        price: parseInt(price || 0),
+        image: imageUrl
       }
     });
     res.status(200).json(event);

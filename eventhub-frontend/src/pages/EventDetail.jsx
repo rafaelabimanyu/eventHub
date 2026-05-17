@@ -62,11 +62,37 @@ const EventDetail = () => {
     setBookingLoading(true);
     try {
       const response = await bookTicket(id);
-      showToast('Pendaftaran Berhasil!');
-      setRegistered(true);
-      setTicketData(response.ticket);
-      setEvent(prev => ({ ...prev, quota: prev.quota - 1 })); // Decrement real-time quota
-      setShowTicketModal(true);
+      
+      if (response.snapToken) {
+        // Handle Midtrans Snap Payment
+        window.snap.pay(response.snapToken, {
+          onSuccess: function (result) {
+            showToast('Pembayaran Berhasil! Tiket sedang diproses.');
+            setRegistered(true);
+            setTicketData(response.ticket);
+            setEvent(prev => ({ ...prev, quota: prev.quota - 1 }));
+            setShowTicketModal(true);
+          },
+          onPending: function (result) {
+            showToast('Menunggu pembayaran diselesaikan.', 'warning');
+            navigate('/my-tickets'); // Redirect to my tickets page
+          },
+          onError: function (result) {
+            showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
+          },
+          onClose: function () {
+            showToast('Pop-up ditutup tanpa menyelesaikan pembayaran.', 'warning');
+            navigate('/my-tickets');
+          }
+        });
+      } else {
+        // Free event
+        showToast('Pendaftaran Berhasil!');
+        setRegistered(true);
+        setTicketData(response.ticket);
+        setEvent(prev => ({ ...prev, quota: prev.quota - 1 })); // Decrement real-time quota
+        setShowTicketModal(true);
+      }
     } catch (err) {
       showToast(err?.response?.data?.message || 'Gagal mendaftar event', 'error');
     } finally {
@@ -114,7 +140,14 @@ const EventDetail = () => {
         </Link>
         
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
-          <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+          {event.image ? (
+            <div className="h-64 md:h-80 w-full relative">
+              <img src={`http://localhost:5000${event.image}`} alt={event.title} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/20"></div>
+            </div>
+          ) : (
+            <div className="h-40 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+          )}
           
           <div className="px-8 pb-10">
             <div className="relative -mt-12 flex justify-between items-end mb-8">
@@ -165,6 +198,11 @@ const EventDetail = () => {
               
               <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col justify-center">
                 <h3 className="font-semibold text-slate-900 mb-2">Pendaftaran Event</h3>
+                <div className="mb-3">
+                  <span className="text-3xl font-bold text-slate-900">
+                    {event.price > 0 ? `Rp ${event.price.toLocaleString('id-ID')}` : 'Gratis'}
+                  </span>
+                </div>
                 <p className="text-slate-500 text-sm mb-5">
                   {registered ? 'Tiket Anda sudah diterbitkan dan aman.' : `Segera daftar sebelum kehabisan kuota! Hanya tersisa ${event.quota} kursi.`}
                 </p>

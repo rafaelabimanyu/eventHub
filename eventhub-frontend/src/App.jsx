@@ -7,6 +7,8 @@ import EventDetail from './pages/EventDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import MyTickets from './pages/MyTickets';
+import AdminValidator from './pages/AdminValidator';
 import Navbar from './components/Navbar';
 
 // AnimatePresence requires useLocation to know when the route changes
@@ -20,6 +22,8 @@ const AnimatedRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/my-tickets" element={<MyTickets />} />
+        <Route path="/admin/validator" element={<AdminValidator />} />
       </Routes>
     </AnimatePresence>
   );

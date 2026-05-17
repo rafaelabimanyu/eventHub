@@ -21,3 +21,8 @@ export const getMyTickets = async () => {
   const response = await axios.get(`${API_URL}/my-tickets`, getAuthHeader());
   return response.data;
 };
+
+export const checkInTicket = async (ticketId) => {
+  const response = await axios.put(`${API_URL}/check-in/${ticketId}`, {}, getAuthHeader());
+  return response.data;
+};

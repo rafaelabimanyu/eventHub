@@ -30,6 +30,8 @@ model Event {
   description String
   category    String
   quota       Int
+  image       String?
+  price       Int      @default(0)
   userId      String?
   organizer   User?    @relation(fields: [userId], references: [id])
   tickets     Ticket[]
@@ -41,6 +43,7 @@ model Ticket {
   id        String   @id @default(uuid())
   userId    String
   eventId   String
+  status    String   @default("PENDING")
   user      User     @relation(fields: [userId], references: [id])
   event     Event    @relation(fields: [eventId], references: [id])
   createdAt DateTime @default(now())

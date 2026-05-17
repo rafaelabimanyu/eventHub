@@ -9,8 +9,11 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     location: '',
     category: 'Umum',
     quota: '',
-    description: ''
+    price: '0',
+    description: '',
+    image: null
   });
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,10 +25,25 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
         ...initialData,
         date: formattedDate
       });
+      if (initialData.image) {
+        setPreview(`http://localhost:5000${initialData.image}`);
+      } else {
+        setPreview(null);
+      }
     } else {
-      setFormData({ title: '', date: '', location: '', category: 'Teknologi', quota: '', description: '' });
+      setFormData({ title: '', date: '', location: '', category: 'Teknologi', quota: '', price: '0', description: '', image: null });
+      setPreview(null);
     }
   }, [initialData, isOpen]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({ ...prev, image: file }));
+      setPreview(URL.createObjectURL(file));
+      setError('');
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,8 +67,17 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
       return;
     }
 
+    const submitData = new FormData();
+    for (const key in formData) {
+      if (formData[key] !== null && formData[key] !== undefined) {
+        // Don't append image if it's just a string URL from initialData
+        if (key === 'image' && typeof formData[key] === 'string') continue;
+        submitData.append(key, formData[key]);
+      }
+    }
+
     setLoading(true);
-    await onSubmit(formData);
+    await onSubmit(submitData);
     setLoading(false);
   };
 
@@ -87,12 +114,13 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               <button 
                 onClick={onClose}
                 className="p-2 rounded-full hover:bg-gray-200 text-gray-500 transition-colors"
+                type="button"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="p-6 space-y-5" encType="multipart/form-data">
               
               <AnimatePresence>
                 {error && (
@@ -140,6 +168,32 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                   </motion.select>
                 </div>
 
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Banner Event Asli</label>
+                  <div className="flex items-center space-x-4">
+                    <motion.div whileHover={{ scale: 1.02 }} className="flex-grow">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                    </motion.div>
+                    <AnimatePresence>
+                      {preview && (
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.8 }} 
+                          animate={{ opacity: 1, scale: 1 }} 
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className="w-20 h-20 rounded-xl border border-gray-200 overflow-hidden flex-shrink-0 bg-gray-50"
+                        >
+                          <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
                 <div className="col-span-2 md:col-span-1">
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tanggal</label>
                   <motion.input
@@ -168,7 +222,22 @@ const EventModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                   />
                 </div>
 
-                <div className="col-span-2">
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Harga Tiket (Rp)</label>
+                  <motion.input
+                    whileFocus={{ scale: 1.01 }}
+                    type="number"
+                    name="price"
+                    required
+                    min="0"
+                    value={formData.price}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                    placeholder="0 (Gratis)"
+                  />
+                </div>
+
+                <div className="col-span-2 md:col-span-1">
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Lokasi</label>
                   <motion.input
                     whileFocus={{ scale: 1.01 }}
