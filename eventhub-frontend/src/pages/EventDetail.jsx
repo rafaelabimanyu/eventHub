@@ -1,0 +1,154 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { getEventById } from '../services/eventService';
+import { Calendar, MapPin, ArrowLeft, Loader2, Tag, Users, CheckCircle } from 'lucide-react';
+
+const EventDetail = () => {
+  const { id } = useParams();
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [registered, setRegistered] = useState(false);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const data = await getEventById(id);
+        setEvent(data);
+      } catch (err) {
+        setError('Gagal memuat detail event. Event mungkin tidak ditemukan.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+        <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
+        <p className="text-slate-500 font-medium">Memuat detail event...</p>
+      </div>
+    );
+  }
+
+  if (error || !event) {
+    return (
+      <div className="min-h-screen bg-slate-50 pt-24 px-4">
+        <div className="max-w-3xl mx-auto bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
+          <p className="text-red-600 font-semibold mb-2">Oops!</p>
+          <p className="text-red-500 mb-6">{error || 'Event tidak ditemukan'}</p>
+          <Link to="/" className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800 transition-colors">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Kembali ke Beranda
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const formattedDate = new Date(event.date).toLocaleDateString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  return (
+    <div className="min-h-screen bg-slate-50 pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <Link to="/" className="inline-flex items-center text-slate-500 hover:text-blue-600 font-medium mb-8 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Kembali ke Daftar Event
+        </Link>
+        
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+          <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
+          
+          <div className="px-8 pb-10">
+            <div className="relative -mt-12 flex justify-between items-end mb-8">
+              <div className="bg-white p-3 rounded-2xl shadow-md border border-slate-50">
+                <div className="bg-blue-50 text-blue-700 font-bold px-6 py-4 rounded-xl text-center">
+                  <div className="text-sm uppercase tracking-wider mb-1">{new Date(event.date).toLocaleDateString('id-ID', { month: 'short' })}</div>
+                  <div className="text-3xl">{new Date(event.date).getDate()}</div>
+                </div>
+              </div>
+              <div className="flex space-x-3 mb-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  <Tag className="w-3.5 h-3.5 mr-1.5" />
+                  {event.category || 'Umum'}
+                </span>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  <Users className="w-3.5 h-3.5 mr-1.5" />
+                  Sisa Kuota: {event.quota}
+                </span>
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
+              {event.title}
+            </h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="bg-blue-50 p-2.5 rounded-xl mr-4 text-blue-600 mt-0.5">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 text-sm mb-1">Tanggal & Waktu</h3>
+                    <p className="text-slate-600">{formattedDate} WIB</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="bg-blue-50 p-2.5 rounded-xl mr-4 text-blue-600 mt-0.5">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 text-sm mb-1">Lokasi</h3>
+                    <p className="text-slate-600">{event.location}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex flex-col justify-center">
+                <h3 className="font-semibold text-slate-900 mb-2">Pendaftaran Event</h3>
+                <p className="text-slate-500 text-sm mb-5">Segera daftar sebelum kehabisan kuota! Hanya tersisa {event.quota} kursi.</p>
+                {registered ? (
+                  <div className="flex items-center justify-center py-3 px-4 rounded-xl bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200">
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Berhasil Mendaftar
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setRegistered(true)}
+                    disabled={event.quota <= 0}
+                    className="w-full flex items-center justify-center py-3 px-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                  >
+                    {event.quota > 0 ? 'Daftar Event Sekarang' : 'Kuota Penuh'}
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4 border-b border-slate-100 pb-3">
+                Tentang Event Ini
+              </h2>
+              <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                <p>{event.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EventDetail;
